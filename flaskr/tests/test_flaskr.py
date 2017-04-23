@@ -64,31 +64,29 @@ def test_login_incorrect_credentials(client):
 
 def test_add_entries_login(client):
     with client as c:
-        rv = c.post('/login', data=dict(
-            username=flaskr.app.config['USERNAME'],
-            password=flaskr.app.config['PASSWORD']
-        ), follow_redirects=True)
+        rv = login(client, flaskr.app.config['USERNAME'],
+                   flaskr.app.config['PASSWORD'])
         assert b'You were logged in' in rv.data
-        rv = c.post('/add', data=dict(
-            title='Hello',
-            text='<strong>HTML</strong> allowed here'
+        rv = client.post('/add', data=dict(
+            username='test',
+            password='Hema7067'
         ), follow_redirects=True)
-        assert b'Unbelievable.  No entries here so far' not in rv.data
+        assert b'New entry was successfully posted' in rv.data
 
 def test_add_entries_logout(client):
     with client as c:
         rv = c.post('/add', data=dict(
-            title='Hello',
-            text='<strong>HTML</strong> allowed here'
+            username=flaskr.app.config['USERNAME'],
+            password=flaskr.app.config['PASSWORD']
         ), follow_redirects=True)
-        assert b'Hello' not in rv.data
+        assert b'You were logged out' not in rv.data
 
 def test_messages(client):
     rv = login(client, flaskr.app.config['USERNAME'],
                flaskr.app.config['PASSWORD'])
     assert b'You were logged in' in rv.data
     rv = client.post('/add', data=dict(
-        title='<Hello>',
-        text='<strong>HTML</strong> allowed here'
+        username='test',
+        password='test'
     ), follow_redirects=True)
-    assert b'Unbelievable.  No entries here so far' not in rv.data
+    assert b'Not a Valid Password. Password should be minimum 8 letters long with at least one capital letter a number' in rv.data

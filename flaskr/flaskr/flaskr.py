@@ -5,6 +5,8 @@ import re
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
+os.environ['FLASK_APP'] = 'flaskr' # to avoid error msg
+
 app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , flaskr.py
 
@@ -24,9 +26,9 @@ def connect_db():
     rv.row_factory = sqlite3.Row
     return rv
 
-def init_db():
+def init_db(schema='schema.sql'):
     db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
+    with app.open_resource(schema, mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
@@ -114,5 +116,49 @@ def logout():
     flash('You were logged out')
     return redirect(url_for('show_entries'))
 
+@app.route('/shutdown')
+def shutdown():
+    if app.environment == 'test':
+        shutdown_server()
+    return "Server shutdown"
+
+@app.cli.command('start')
+def start():
+    app.config.from_object(__name__) # load config from this file
+
+    app.config.update(dict(
+        DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+        SECRET_KEY='Production key',
+    ))
+    app.config.from_envvar('FLASKR_SETTINGS',  silent=True)
+
+    app.run()
+
+
+def test_server():
+    ### Setup for integration testing
+    app.config.from_object(__name__) # load config from this file
+
+    app.config.update(dict(
+        DATABASE=os.path.join(app.root_path, 'flaskr_test.db'),
+        SECRET_KEY='Test key',
+        SERVER_NAME='localhost:59407',
+        # DEBUG=True, # does not work from behave
+    ))
+    app.config.from_envvar('FLASKR_TEST_SETTINGS',  silent=True)
+    app.environment = 'test'
+    with app.app_context():
+        init_db('test_schema.sql')
+    app.run()
+
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError("Not running with Werkzeug server")
+    if app.environment == 'test':
+        func()
+        os.unlink(app.config['DATABASE'])
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    start()

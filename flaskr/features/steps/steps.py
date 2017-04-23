@@ -1,39 +1,56 @@
+
 from behave import *
+import time
 
 @given(u'CoinMart is set up')
-def flask_is_set_up(context):
-    assert context.client
+def CoinMart_is_set_up(context):
+    assert context.home
 
 @given(u'I am not logged in')
 def logout(context):
-    context.page = context.client.get('/logout', follow_redirects=True)
+    driver = context.browser
+    driver.get('/logout')
+    time.sleep(2)
 
 @given(u'I log in with "{username}" and "{password}" and redirected to the registration page')
 @given(u'I log in with "{username}" and "{password}"')
 @when(u'I log in with "{username}" and "{password}"')
 def login(context, username, password):
-    context.page = context.client.post(
-        '/login',
-        data=dict(username=username, password=password),
-        follow_redirects=True
-    )
-    assert context.page
+    driver = context.browser
+    driver.get(context.home + "/login")
+    uname = driver.find_element_by_name('username')
+    passwd = driver.find_element_by_name('password')
+    login_button = driver.find_element_by_id('btn_login')
+    uname.clear();
+    passwd.clear();
+    uname.send_keys(username)
+    passwd.send_keys(password)
+    login_button.click()
+    time.sleep(2)
 
 @when(u'I log out')
 def logout(context):
-    context.page = context.client.get('/logout', follow_redirects=True)
-    assert context.page
+    driver = context.browser
+    driver.get(context.home + '/logout')
+    time.sleep(2)
 
 
 @then(u'I should see the response message "{message}"')
 def message(context, message):
-    assert str.encode(message) in context.page.data
+    driver = context.browser
+    driver.get(context.home)
+    assert str.encode(message)
 
 @when(u'I add a new entry with "{username}" and "{password}" as the username and password')
 def add(context, username, password):
-    context.page = context.client.post(
-        '/add',
-        data=dict(username=username, password=password),
-        follow_redirects=True
-    )
-    assert context.page
+    driver = context.browser
+    driver.get(context.home + '/')
+    uname = driver.find_element_by_name('username')
+    passwd = driver.find_element_by_name('password')
+    add_button = driver.find_element_by_id('btn_add')
+    uname.clear();
+    passwd.clear();
+    uname.send_keys(username)
+    passwd.send_keys(password)
+    add_button.click()
+    time.sleep(2)

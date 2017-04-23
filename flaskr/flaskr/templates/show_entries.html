@@ -5,10 +5,10 @@
     <form action="{{ url_for('add_entry') }}" method=post class=add-entry>
       <dl>
         <dt>Username:
-        <dd><input type=text size=30 name=username>
+        <dd><input  id=username type=text size=30 name=username>
         <dt>Password:
-        <dd><input type=password size=30 name=password></input>
-        <dd><input type=submit value=Add>
+        <dd><input  id=password type=password size=30 name=password>
+        <dd><input id=btn_add type=submit value=Add>
       </dl>
     </form>
   {% endif %}
