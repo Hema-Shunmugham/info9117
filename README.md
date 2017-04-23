@@ -11,3 +11,5 @@ flask run -  To run the Coinmart application http://127.0.0.1:5000/<br/>
 pytest - To run the unit tests<br/>
 behave - To run the acceptence tests</p>
 
+<strong>Note:</strong> The appropriate executable_path for the geckodriver.exe should be mention in the environment.py webdriver.Firefox(executable_path=r"path for the geckodriver.exe")
+
